@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spesifikasi Bahan Baku — CSE R&D</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=DM+Serif+Display&display=swap');
+
+  :root {
+    --navy: #1a3a6b;
+    --navy-light: #2a5298;
+    --accent: #c8963e;
+    --bg: #f2f0eb;
+    --paper: #ffffff;
+    --text: #1a1a1a;
+    --muted: #6b6b6b;
+    --border: #d0ccc4;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    font-family: 'Inter', sans-serif;
+    color: var(--text);
+    min-height: 100vh;
+    padding: 24px 16px 60px;
+  }
+
+  .app-header {
+    max-width: 880px; margin: 0 auto 20px;
+    display: flex; align-items: center; gap: 14px;
+  }
+  .logo-box {
+    width: 46px; height: 46px; background: var(--navy);
+    border-radius: 8px; display: flex; align-items: center;
+    justify-content: center; color: #fff;
+    font-family: 'DM Serif Display', serif; font-size: 16px;
+    flex-shrink: 0;
+  }
+  .app-title h1 { font-family: 'DM Serif Display', serif; font-size: 19px; color: var(--navy); }
+  .app-title p { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  .config-banner {
+    max-width: 880px; margin: 0 auto 14px;
+    background: #fff8e6; border: 1px solid #e8c96a;
+    border-radius: 8px; padding: 11px 16px;
+    font-size: 12px; color: #7a5c00;
+  }
+  .config-banner details summary { cursor: pointer; font-weight: 600; }
+  .config-banner input {
+    width: 100%; margin-top: 7px;
+    border: 1px solid #e8c96a; border-radius: 4px;
+    padding: 6px 10px; font-size: 12px; background: #fff;
+    font-family: 'Inter', sans-serif;
+  }
+  .config-banner .cfg-btn {
+    margin-top: 6px; padding: 5px 14px;
+    background: var(--navy); color: #fff;
+    border: none; border-radius: 4px; font-size: 12px;
+    cursor: pointer; font-family: 'Inter', sans-serif;
+  }
+
+  .selector-bar {
+    max-width: 880px; margin: 0 auto 20px;
+    background: var(--paper); border: 1px solid var(--border);
+    border-radius: 10px; padding: 14px 18px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .selector-bar label { font-size: 11px; font-weight: 600; letter-spacing: .07em; color: var(--muted); text-transform: uppercase; white-space: nowrap; }
+  .selector-bar select {
+    flex: 1; min-width: 220px;
+    font-family: 'Inter', sans-serif; font-size: 13px; color: var(--text);
+    border: 1px solid var(--border); border-radius: 6px;
+    padding: 7px 10px; background: var(--bg); cursor: pointer; outline: none;
+  }
+  .selector-bar select:focus { border-color: var(--navy); }
+
+  .btn-dl {
+    padding: 8px 18px; background: var(--navy); color: #fff;
+    border: none; border-radius: 6px; font-family: 'Inter', sans-serif;
+    font-size: 13px; font-weight: 500; cursor: pointer; white-space: nowrap;
+    display: flex; align-items: center; gap: 6px; transition: background .15s;
+  }
+  .btn-dl:hover { background: var(--navy-light); }
+  .btn-dl:disabled { background: #999; cursor: not-allowed; }
+
+  /* ── DOCUMENT (rendered & printed) ── */
+  .doc-wrap { max-width: 880px; margin: 0 auto; }
+
+  #docArea {
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    box-shadow: 0 2px 12px rgba(0,0,0,.07);
+  }
+
+  /* The printable document itself */
+  #docContent {
+    width: 794px; /* A4 px at 96dpi */
+    padding: 40px 50px;
+    font-family: Arial, Helvetica, sans-serif; /* use system fonts for html2canvas */
+    font-size: 11px;
+    color: #1a1a1a;
+    background: #fff;
+    margin: 0 auto;
+  }
+
+  /* KOP */
+  .kop {
+    display: table; width: 100%;
+    border-collapse: collapse;
+    border: 1.5px solid #111;
+    margin-bottom: 0;
+  }
+  .kop-row { display: table-row; }
+  .kop-logo, .kop-title, .kop-meta {
+    display: table-cell;
+    border: 1.5px solid #111;
+    vertical-align: middle;
+  }
+  .kop-logo {
+    width: 110px; text-align: center; padding: 10px 8px;
+  }
+  .kop-logo .cse-badge {
+    display: inline-block;
+    background: #1a3a6b; color: #fff;
+    font-size: 18px; font-weight: 700;
+    padding: 5px 9px; border-radius: 4px; margin-bottom: 4px;
+  }
+  .kop-logo .brand-sub {
+    font-size: 7px; font-weight: 600; letter-spacing: .04em;
+    color: #1a3a6b; line-height: 1.5; text-align: center;
+  }
+  .kop-title {
+    width: 45%; text-align: center; padding: 10px 12px;
+  }
+  .kop-title .t1 { font-size: 13px; font-weight: 700; line-height: 1.3; }
+  .kop-title .t2 { font-size: 12px; font-weight: 700; color: #1a3a6b; margin-top: 4px; }
+  .kop-meta { padding: 8px 12px; font-size: 10px; }
+  .kop-meta .pg { font-weight: 600; margin-bottom: 5px; font-size: 10px; }
+  .kop-meta .mr { display: flex; gap: 3px; line-height: 1.7; }
+  .kop-meta .ml { font-weight: 600; min-width: 105px; }
+
+  .bagian-hdr {
+    border: 1.5px solid #111; border-top: none;
+    text-align: center; font-size: 11px; font-weight: 700;
+    padding: 5px; letter-spacing: .05em;
+  }
+  .ttd-grid {
+    display: table; width: 100%; border-collapse: collapse;
+    border: 1.5px solid #111; border-top: none; margin-bottom: 22px;
+  }
+  .ttd-row { display: table-row; }
+  .ttd-cell {
+    display: table-cell; border: 1.5px solid #111;
+    padding: 8px 14px; font-size: 10px; text-align: center;
+    vertical-align: bottom; width: 33.3%;
+  }
+  .ttd-cell:last-child { border-right: 1.5px solid #111; }
+  .ttd-cell .role { font-weight: 600; padding-bottom: 38px; display: block; }
+  .ttd-cell .name { font-weight: 700; border-top: 1px solid #111; padding-top: 4px; font-size: 10px; }
+
+  .sec { margin-bottom: 18px; }
+  .sec-title { font-size: 11px; font-weight: 700; text-decoration: underline; margin-bottom: 6px; }
+
+  table.tbl { width: 100%; border-collapse: collapse; font-size: 10.5px; }
+  table.tbl th {
+    background: #1a3a6b; color: #fff;
+    padding: 6px 8px; text-align: left; font-size: 10px;
+    font-weight: 700; border: 1px solid #1a3a6b;
+  }
+  table.tbl td { border: 1px solid #999; padding: 5px 8px; vertical-align: top; }
+  table.tbl tr:nth-child(even) td { background: #f8f8f6; }
+  table.tbl .lbl { font-weight: 600; background: #f5f4f0 !important; width: 175px; }
+
+  table.rtbl { width: 100%; border-collapse: collapse; font-size: 10.5px; }
+  table.rtbl th {
+    background: #1a3a6b; color: #fff; padding: 6px 8px;
+    font-size: 10px; font-weight: 700; text-align: center;
+    border: 1px solid #1a3a6b;
+  }
+  table.rtbl td { border: 1px solid #999; padding: 5px 8px; text-align: center; height: 22px; }
+
+  /* Spinner overlay */
+  #spinnerOverlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(255,255,255,.7); z-index: 999;
+    flex-direction: column; align-items: center; justify-content: center;
+    gap: 14px; font-size: 14px; color: #1a3a6b; font-weight: 500;
+  }
+  #spinnerOverlay.show { display: flex; }
+  .spinner {
+    width: 36px; height: 36px; border: 4px solid #e0e0e0;
+    border-top-color: #1a3a6b; border-radius: 50%;
+    animation: spin .7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .empty-state {
+    text-align: center; padding: 60px 20px; color: var(--muted);
+  }
+  .empty-state svg { margin-bottom: 14px; opacity: .3; }
+  .empty-state p { font-size: 13px; }
+</style>
+</head>
+<body>
+
+<!-- Spinner -->
+<div id="spinnerOverlay">
+  <div class="spinner"></div>
+  <span id="spinnerMsg">Membuat PDF…</span>
+</div>
+
+<div class="app-header">
+  <div class="logo-box">CSE</div>
+  <div class="app-title">
+    <h1>Spesifikasi Bahan Baku</h1>
+    <p>Bagian Research & Development — Cakrawala Semesta Estetika</p>
+  </div>
+</div>
+
+<div class="config-banner">
+  <details>
+    <summary>⚙️ Konfigurasi Apps Script URL</summary>
+    <input type="text" id="apiUrlInput" placeholder="https://script.google.com/macros/s/.../exec" />
+    <br><button class="cfg-btn" onclick="saveApiUrl()">Simpan &amp; Muat Data</button>
+  </details>
+</div>
+
+<div class="selector-bar">
+  <label>Pilih Bahan Baku</label>
+  <select id="bbSelect" onchange="renderDoc()">
+    <option value="">— Memuat daftar… —</option>
+  </select>
+  <button class="btn-dl" id="dlBtn" onclick="downloadPDF()" disabled>
+    ⬇ Download PDF
+  </button>
+</div>
+
+<div class="doc-wrap">
+  <div id="docArea">
+    <div class="empty-state">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+      </svg>
+      <p>Pilih bahan baku dari dropdown untuk menampilkan dokumen spesifikasi.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'cse_sbb_api_url';
+let API_URL = localStorage.getItem(STORAGE_KEY) || 'https://script.google.com/macros/s/AKfycbytg91zwj9QXlcPh_EQU9ykJ5CHe-OaLIFqloEeC2CGBQoMv48xJ7lFsvtCcgohra4h/exec';
+let allData = [];
+let currentDoc = null;
+
+function saveApiUrl() {
+  const v = document.getElementById('apiUrlInput').value.trim();
+  if (!v) return alert('URL tidak boleh kosong.');
+  localStorage.setItem(STORAGE_KEY, v);
+  API_URL = v;
+  loadData();
+}
+
+window.onload = () => {
+  if (API_URL) {
+    document.getElementById('apiUrlInput').value = API_URL;
+    loadData();
+  }
+};
+
+async function loadData() {
+  const sel = document.getElementById('bbSelect');
+  sel.innerHTML = '<option value="">— Memuat… —</option>';
+  document.getElementById('dlBtn').disabled = true;
+  try {
+    const payload = encodeURIComponent(JSON.stringify({ action: 'getDaftarSBB' }));
+    const res = await fetch(API_URL + '?payload=' + payload);
+    const json = await res.json();
+    if (json.error) throw new Error(json.error);
+    allData = json;
+
+    // Revisi terbaru per kode BB
+    const latest = {};
+    allData.forEach(row => {
+      const kode = row.kodeBB;
+      if (!latest[kode] || Number(row.revisi) > Number(latest[kode].revisi))
+        latest[kode] = row;
+    });
+    const sorted = Object.values(latest).sort((a,b) => a.namaBB.localeCompare(b.namaBB));
+
+    sel.innerHTML = '<option value="">— Pilih Bahan Baku —</option>';
+    sorted.forEach(r => {
+      const o = document.createElement('option');
+      o.value = r.noDokTerbaru;
+      o.textContent = `${r.kodeBB} — ${r.namaBB}`;
+      sel.appendChild(o);
+    });
+  } catch(e) {
+    sel.innerHTML = '<option value="">— Gagal memuat —</option>';
+    alert('Gagal memuat data: ' + e.message);
+  }
+}
+
+function safe(v) { return (v !== undefined && v !== null && v !== '') ? v : '-'; }
+
+function formatDate(val) {
+  if (!val || val === '-') return '-';
+  if (/^\d{5}$/.test(String(val).trim()) || (typeof val === 'number' && val > 40000)) {
+    const d = new Date(Math.round((Number(val) - 25569) * 86400000));
+    return d.toLocaleDateString('id-ID', { day:'2-digit', month:'long', year:'numeric' });
+  }
+  return String(val);
+}
+
+function renderDoc() {
+  const noDok = document.getElementById('bbSelect').value;
+  const dlBtn = document.getElementById('dlBtn');
+  if (!noDok) {
+    document.getElementById('docArea').innerHTML = `
+      <div class="empty-state">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+        </svg>
+        <p>Pilih bahan baku dari dropdown untuk menampilkan dokumen spesifikasi.</p>
+      </div>`;
+    dlBtn.disabled = true;
+    currentDoc = null;
+    return;
+  }
+
+  const docRows = allData.filter(r => r.noDokTerbaru === noDok);
+  if (!docRows.length) return;
+  const d = docRows.sort((a,b) => Number(b.revisi) - Number(a.revisi))[0];
+  currentDoc = d;
+
+  // Semua riwayat bahan baku sama
+  const history = allData
+    .filter(r => r.kodeBB === d.kodeBB)
+    .sort((a,b) => Number(a.revisi) - Number(b.revisi));
+
+  // Buat 10 baris riwayat (isi + kosong)
+  let histRows = '';
+  for (let i = 0; i < 10; i++) {
+    const h = history[i];
+    histRows += `<tr>
+      <td>${h ? '0' + Number(h.revisi) : ''}</td>
+      <td>${h ? safe(h.noDokTerbaru) : ''}</td>
+      <td>${h ? formatDate(h.tanggal) : ''}</td>
+      <td style="text-align:left">${h ? safe(h.alasanPerubahan) : ''}</td>
+    </tr>`;
+  }
+
+  document.getElementById('docArea').innerHTML = `
+<div id="docContent">
+
+  <!-- KOP -->
+  <div class="kop">
+    <div class="kop-row">
+      <div class="kop-logo">
+        <div class="cse-badge">CSE</div><br>
+        <div class="brand-sub">CAKRAWALA<br>SEMESTA<br>ESTETIKA</div>
+      </div>
+      <div class="kop-title">
+        <div class="t1">SPESIFIKASI BAHAN BAKU</div>
+        <div class="t2">${safe(d.namaBB).toUpperCase()}/${safe(d.kodeBB)}</div>
+      </div>
+      <div class="kop-meta">
+        <div class="pg">Halaman 1 dari 1</div>
+        <div class="mr"><span class="ml">No. Dokumen</span><span>: ${safe(d.noDokTerbaru)}</span></div>
+        <div class="mr"><span class="ml">Tanggal Berlaku</span><span>: ${formatDate(d.tanggal)}</span></div>
+        <div class="mr"><span class="ml">Menggantikan</span><span>: ${safe(d.noDokSebelumnya)}</span></div>
+        <div class="mr"><span class="ml">Tanggal</span><span>: ${Number(d.revisi) > 0 ? formatDate(d.tanggal) : '-'}</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bagian-hdr">BAGIAN RESEARCH AND DEVELOPMENT</div>
+  <div class="ttd-grid">
+    <div class="ttd-row">
+      <div class="ttd-cell">
+        <span class="role">Disusun oleh<br>MOA dan Stabilita</span>
+        <span class="name">Fransiska Mutiara</span>
+      </div>
+      <div class="ttd-cell">
+        <span class="role">Diperiksa oleh<br>PIC MOA dan Stabilita</span>
+        <span class="name">Andreana Anggi</span>
+      </div>
+      <div class="ttd-cell" style="border-right:none">
+        <span class="role">Disetujui oleh<br>Apoteker Penanggung Jawab</span>
+        <span class="name">Vicania Raisa Rahman</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1. IDENTITAS -->
+  <div class="sec">
+    <div class="sec-title">1. IDENTITAS BAHAN BAKU</div>
+    <table class="tbl">
+      <tr><td class="lbl">Nama Bahan Baku/Kode Bahan</td><td>${safe(d.namaBB)}</td></tr>
+      <tr><td class="lbl">INCI</td><td>${safe(d.inci)}</td></tr>
+      <tr><td class="lbl">Produsen</td><td>${safe(d.produsen)}</td></tr>
+      <tr><td class="lbl">Nama Pemasok/Supplier</td><td>${safe(d.namaPemasok)}</td></tr>
+      <tr><td class="lbl">Negara Produsen</td><td>${safe(d.negaraProdusen)}</td></tr>
+    </table>
+  </div>
+
+  <!-- 2. PARAMETER UJI -->
+  <div class="sec">
+    <div class="sec-title">2. PARAMETER UJI</div>
+    <table class="tbl">
+      <thead>
+        <tr><th style="width:30%">ANALISA</th><th style="width:40%">SPESIFIKASI</th><th>METODE</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Pemerian</strong><br>a. Bentuk<br>b. Warna<br>c. Bau</td>
+          <td>${safe(d.bentuk)}<br>${safe(d.warna)}<br>${safe(d.bau)}</td>
+          <td>Visual &amp; Organoleptik</td>
+        </tr>
+        <tr>
+          <td><strong>Tetapan Fisik</strong><br>pH<br>Viskositas<br>Berat Jenis<br>Index Refraksi<br>Kelarutan</td>
+          <td>${safe(d.ph)}<br>${safe(d.viskositas)}<br>${safe(d.beratJenis)}<br>${safe(d.indeksBias)}<br>${safe(d.kelarutan)}</td>
+          <td>pH Meter<br>Viskometer<br>Piknometer<br>Refraktometer<br>Uji Kualitatif</td>
+        </tr>
+        <tr>
+          <td><strong>Kondisi penyimpanan</strong></td>
+          <td>${safe(d.kondisiPenyimpanan)}</td>
+          <td>Visual</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 3. RIWAYAT -->
+  <div class="sec">
+    <div class="sec-title">3. RIWAYAT PERUBAHAN</div>
+    <table class="rtbl">
+      <thead>
+        <tr>
+          <th style="width:12%">No. Revisi</th>
+          <th style="width:28%">Nomor Dokumen</th>
+          <th style="width:22%">Tanggal Berlaku</th>
+          <th>Alasan Perubahan</th>
+        </tr>
+      </thead>
+      <tbody>${histRows}</tbody>
+    </table>
+  </div>
+
+</div>`;
+
+  dlBtn.disabled = false;
+}
+
+async function downloadPDF() {
+  if (!currentDoc) return;
+  const docEl = document.getElementById('docContent');
+  if (!docEl) return;
+
+  const overlay = document.getElementById('spinnerOverlay');
+  const msg = document.getElementById('spinnerMsg');
+  overlay.classList.add('show');
+  msg.textContent = 'Merender dokumen…';
+
+  try {
+    // Render to canvas at 2x scale for sharpness
+    const canvas = await html2canvas(docEl, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: '#ffffff',
+      logging: false
+    });
+
+    msg.textContent = 'Membuat PDF…';
+
+    const { jsPDF } = window.jspdf;
+    // A4: 210 x 297 mm
+    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+    const pageW = 210;
+    const pageH = 297;
+    const margin = 8;
+    const imgW = pageW - margin * 2;
+
+    const canvasW = canvas.width;
+    const canvasH = canvas.height;
+    const ratio = canvasW / canvasH;
+
+    // If content is taller than one page, split
+    const imgH = imgW / ratio;
+
+    if (imgH <= pageH - margin * 2) {
+      // Single page
+      const imgData = canvas.toDataURL('image/jpeg', 0.97);
+      pdf.addImage(imgData, 'JPEG', margin, margin, imgW, imgH);
+    } else {
+      // Multi-page: slice canvas
+      const pxPerMm = canvasW / imgW;
+      const sliceH = (pageH - margin * 2) * pxPerMm;
+      let yOffset = 0;
+      let page = 0;
+      while (yOffset < canvasH) {
+        const sliceCanvas = document.createElement('canvas');
+        sliceCanvas.width = canvasW;
+        sliceCanvas.height = Math.min(sliceH, canvasH - yOffset);
+        const ctx = sliceCanvas.getContext('2d');
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, sliceCanvas.width, sliceCanvas.height);
+        ctx.drawImage(canvas, 0, yOffset, canvasW, sliceCanvas.height, 0, 0, canvasW, sliceCanvas.height);
+        const sliceData = sliceCanvas.toDataURL('image/jpeg', 0.97);
+        const sliceImgH = (sliceCanvas.height / pxPerMm);
+        if (page > 0) pdf.addPage();
+        pdf.addImage(sliceData, 'JPEG', margin, margin, imgW, sliceImgH);
+        yOffset += sliceH;
+        page++;
+      }
+    }
+
+    const filename = `SBB_${currentDoc.kodeBB}_${(currentDoc.namaBB || '').replace(/[^a-zA-Z0-9]/g,'_')}.pdf`;
+    pdf.save(filename);
+  } catch(e) {
+    alert('Gagal membuat PDF: ' + e.message);
+  } finally {
+    overlay.classList.remove('show');
+  }
+}
+</script>
+</body>
+</html>
