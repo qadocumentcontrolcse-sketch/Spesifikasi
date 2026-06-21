@@ -1,0 +1,1380 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spesifikasi Bahan Baku — CSE R&D</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=DM+Serif+Display&display=swap');
+
+  :root {
+    --navy: #1a3a6b;
+    --navy-light: #2a5298;
+    --accent: #c8963e;
+    --bg: #f2f0eb;
+    --paper: #ffffff;
+    --text: #1a1a1a;
+    --muted: #6b6b6b;
+    --border: #d0ccc4;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    font-family: 'Inter', sans-serif;
+    color: var(--text);
+    min-height: 100vh;
+    padding: 24px 16px 60px;
+  }
+
+  .app-header {
+    max-width: 880px; margin: 0 auto 20px;
+    display: flex; align-items: center; gap: 14px;
+  }
+  .logo-box {
+    width: 46px; height: 46px; background: var(--navy);
+    border-radius: 8px; display: flex; align-items: center;
+    justify-content: center; color: #fff;
+    font-family: 'DM Serif Display', serif; font-size: 16px;
+    flex-shrink: 0;
+  }
+  .app-title h1 { font-family: 'DM Serif Display', serif; font-size: 19px; color: var(--navy); }
+  .app-title p { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  .config-banner {
+    max-width: 880px; margin: 0 auto 14px;
+    background: #fff8e6; border: 1px solid #e8c96a;
+    border-radius: 8px; padding: 11px 16px;
+    font-size: 12px; color: #7a5c00;
+  }
+  .config-banner details summary { cursor: pointer; font-weight: 600; }
+  .config-banner input {
+    width: 100%; margin-top: 7px;
+    border: 1px solid #e8c96a; border-radius: 4px;
+    padding: 6px 10px; font-size: 12px; background: #fff;
+    font-family: 'Inter', sans-serif;
+  }
+  .config-banner .cfg-btn {
+    margin-top: 6px; padding: 5px 14px;
+    background: var(--navy); color: #fff;
+    border: none; border-radius: 4px; font-size: 12px;
+    cursor: pointer; font-family: 'Inter', sans-serif;
+  }
+
+  .selector-bar {
+    max-width: 880px; margin: 0 auto 20px;
+    background: var(--paper); border: 1px solid var(--border);
+    border-radius: 10px; padding: 14px 18px;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  }
+  .selector-bar label { font-size: 11px; font-weight: 600; letter-spacing: .07em; color: var(--muted); text-transform: uppercase; white-space: nowrap; }
+  .selector-bar select {
+    flex: 1; min-width: 220px;
+    font-family: 'Inter', sans-serif; font-size: 13px; color: var(--text);
+    border: 1px solid var(--border); border-radius: 6px;
+    padding: 7px 10px; background: var(--bg); cursor: pointer; outline: none;
+  }
+  .selector-bar select:focus { border-color: var(--navy); }
+
+  .btn-dl {
+    padding: 8px 18px; background: var(--navy); color: #fff;
+    border: none; border-radius: 6px; font-family: 'Inter', sans-serif;
+    font-size: 13px; font-weight: 500; cursor: pointer; white-space: nowrap;
+    display: flex; align-items: center; gap: 6px; transition: background .15s;
+  }
+  .btn-dl:hover { background: var(--navy-light); }
+  .btn-dl:disabled { background: #999; cursor: not-allowed; }
+  .btn-dl-word { background: #2b579a; }
+  .btn-dl-word:hover { background: #3a6cb8; }
+  .btn-dl-word:disabled { background: #999; }
+
+  .doc-wrap { max-width: 880px; margin: 0 auto; }
+
+  #docArea {
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    box-shadow: 0 2px 12px rgba(0,0,0,.07);
+  }
+
+  /* ── DOCUMENT PRINT AREA ── */
+  #docContent {
+    width: 794px;
+    padding: 40px 50px;
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 11pt;
+    color: #000000;
+    background: #fff;
+    margin: 0 auto;
+  }
+
+  /* KOP — match DOCX exactly: 2 baris x 2 kolom (logo+judul | meta), lalu gabung */
+  .kop {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid #000;
+    margin-bottom: 0;
+    table-layout: fixed;
+  }
+  .kop td {
+    border: 1px solid #000;
+    vertical-align: middle;
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 11pt;
+    color: #000;
+  }
+  .kop-logo {
+    width: 130px;
+    text-align: left;
+    vertical-align: top;
+    padding: 4px 8px 6px;
+  }
+  .kop-logo .cse-logo-img {
+    max-width: 120px;
+    height: auto;
+    display: inline-block;
+  }
+  .kop-title {
+    width: 45%;
+    text-align: center;
+    padding: 4px 10px;
+  }
+  .kop-title .t1 {
+    font-size: 14pt;
+    font-weight: 700;
+    line-height: 1.15;
+  }
+  .kop-title .t2 {
+    font-size: 14pt;
+    font-weight: 700;
+  }
+  .kop-meta-top {
+    padding: 7px 10px;
+    font-size: 11pt;
+    vertical-align: middle;
+  }
+  .kop-meta-top .pg {
+    font-weight: 700;
+    text-align: center;
+  }
+  .kop-meta-bottom {
+    padding: 7px 10px;
+    font-size: 11pt;
+    vertical-align: top;
+  }
+  .kop-meta-bottom table {
+    border-collapse: collapse;
+    font-size: 11pt;
+    width: 100%;
+  }
+  .kop-meta-bottom table td {
+    border: none;
+    padding: 1px 0;
+    vertical-align: top;
+    font-size: 11pt;
+  }
+  .kop-meta-bottom .ml {
+    font-weight: 700;
+    white-space: nowrap;
+    padding-right: 4px;
+    min-width: 110px;
+  }
+
+  /* BAGIAN header */
+  .bagian-hdr {
+    border: 1px solid #000;
+    border-top: none;
+    text-align: center;
+    font-size: 11pt;
+    font-weight: 700;
+    padding: 5px;
+    font-family: 'Times New Roman', Times, serif;
+    color: #000;
+  }
+
+  /* TTD grid */
+  .ttd-tbl {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid #000;
+    border-top: none;
+    margin-bottom: 20px;
+    font-family: 'Times New Roman', Times, serif;
+  }
+  .ttd-tbl td {
+    border-left: 1px solid #000;
+    font-size: 11pt;
+    text-align: center;
+    width: 33.33%;
+    color: #000;
+  }
+  .ttd-tbl td:first-child { border-left: none; }
+  .ttd-tbl .role-cell {
+    font-weight: 700;
+    padding: 7px 12px 6px;
+    vertical-align: bottom;
+    border-bottom: 1px solid #000;
+  }
+  .ttd-tbl .sign-cell {
+    height: 110px;
+    border-bottom: 1px solid #000;
+  }
+  .ttd-tbl .name-cell {
+    font-weight: 700;
+    padding: 4px 12px 7px;
+  }
+
+  /* Sections */
+  .sec { margin-bottom: 16px; }
+  .sec-title {
+    font-size: 11pt;
+    font-weight: 700;
+    text-decoration: none;
+    margin-bottom: 5px;
+    font-family: 'Times New Roman', Times, serif;
+    color: #000;
+  }
+
+  /* Identitas table */
+  table.tbl {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11pt;
+    font-family: 'Times New Roman', Times, serif;
+  }
+  table.tbl th {
+    background: transparent;
+    color: #000;
+    padding: 5px 8px;
+    text-align: center;
+    font-size: 11pt;
+    font-weight: 700;
+    border: 1px solid #000;
+  }
+  table.tbl td {
+    border: 1px solid #000;
+    padding: 4px 8px;
+    vertical-align: top;
+    color: #000;
+  }
+  table.tbl .lbl {
+    font-weight: 400;
+    background: transparent;
+    width: 220px;
+  }
+  /* baris multi-line dalam 1 sel: tiap baris sejajar horizontal antar kolom */
+  table.tbl .multiline {
+    display: flex;
+    flex-direction: column;
+  }
+  table.tbl .multiline span {
+    line-height: 1.6;
+    min-height: 1.6em;
+  }
+
+  /* Riwayat table */
+  table.rtbl {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11pt;
+    font-family: 'Times New Roman', Times, serif;
+  }
+  table.rtbl th {
+    background: transparent;
+    color: #000;
+    padding: 5px 8px;
+    font-size: 11pt;
+    font-weight: 700;
+    text-align: center;
+    border: 1px solid #000;
+  }
+  table.rtbl td {
+    border: 1px solid #000;
+    padding: 4px 8px;
+    text-align: center;
+    vertical-align: middle;
+    color: #000;
+  }
+  table.rtbl td.left { text-align: left; }
+
+  /* ── PDF PAGE (off-screen render untuk multi-halaman) ── */
+  .pdf-page { }
+  .pdf-page-body { margin-top: 16px; }
+  .pdf-page .sec { margin-bottom: 16px; }
+  #spinnerOverlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(255,255,255,.7); z-index: 999;
+    flex-direction: column; align-items: center; justify-content: center;
+    gap: 14px; font-size: 14px; color: #1a3a6b; font-weight: 500;
+  }
+  #spinnerOverlay.show { display: flex; }
+  .spinner {
+    width: 36px; height: 36px; border: 4px solid #e0e0e0;
+    border-top-color: #1a3a6b; border-radius: 50%;
+    animation: spin .7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .empty-state {
+    text-align: center; padding: 60px 20px; color: var(--muted);
+  }
+  .empty-state svg { margin-bottom: 14px; opacity: .3; }
+  .empty-state p { font-size: 13px; }
+</style>
+</head>
+<body>
+
+<!-- Spinner -->
+<div id="spinnerOverlay">
+  <div class="spinner"></div>
+  <span id="spinnerMsg">Membuat PDF…</span>
+</div>
+
+<div class="app-header">
+  <div class="logo-box">CSE</div>
+  <div class="app-title">
+    <h1>Spesifikasi Bahan Baku</h1>
+    <p>Bagian Research & Development — Cakrawala Semesta Estetika</p>
+  </div>
+</div>
+
+<div class="config-banner">
+  <details>
+    <summary>⚙️ Konfigurasi Apps Script URL</summary>
+    <input type="text" id="apiUrlInput" placeholder="https://script.google.com/macros/s/.../exec" />
+    <br><button class="cfg-btn" onclick="saveApiUrl()">Simpan &amp; Muat Data</button>
+  </details>
+</div>
+
+<div class="selector-bar">
+  <label>Pilih Bahan Baku</label>
+  <select id="bbSelect" onchange="renderDoc()">
+    <option value="">— Memuat daftar… —</option>
+  </select>
+  <button class="btn-dl" id="dlBtn" onclick="downloadPDF()" disabled>
+    ⬇ Download PDF
+  </button>
+  <button class="btn-dl btn-dl-word" id="dlBtnWord" onclick="downloadWord()" disabled>
+    ⬇ Download Word
+  </button>
+</div>
+
+<div class="doc-wrap">
+  <div id="docArea">
+    <div class="empty-state">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+      </svg>
+      <p>Pilih bahan baku dari dropdown untuk menampilkan dokumen spesifikasi.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'cse_sbb_api_url';
+let API_URL = localStorage.getItem(STORAGE_KEY) || 'https://script.google.com/macros/s/AKfycbytg91zwj9QXlcPh_EQU9ykJ5CHe-OaLIFqloEeC2CGBQoMv48xJ7lFsvtCcgohra4h/exec';
+let allData = [];
+let currentDoc = null;
+
+function saveApiUrl() {
+  const v = document.getElementById('apiUrlInput').value.trim();
+  if (!v) return alert('URL tidak boleh kosong.');
+  localStorage.setItem(STORAGE_KEY, v);
+  API_URL = v;
+  loadData();
+}
+
+window.onload = () => {
+  if (API_URL) {
+    document.getElementById('apiUrlInput').value = API_URL;
+    loadData();
+  }
+  // Prefetch library docx di background, supaya saat tombol Word diklik biasanya sudah siap
+  ensureDocxLoaded().catch(() => { /* diam saja; akan dicoba ulang saat tombol diklik */ });
+};
+
+async function loadData() {
+  const sel = document.getElementById('bbSelect');
+  sel.innerHTML = '<option value="">— Memuat… —</option>';
+  document.getElementById('dlBtn').disabled = true;
+  try {
+    const payload = encodeURIComponent(JSON.stringify({ action: 'getDaftarSBB' }));
+    const res = await fetch(API_URL + '?payload=' + payload);
+    const json = await res.json();
+    if (json.error) throw new Error(json.error);
+    allData = json;
+
+    // Debug: log first item to see field names
+    if (allData.length > 0) console.log('Field names sample:', Object.keys(allData[0]));
+
+    // Revisi terbaru per kode BB
+    const latest = {};
+    allData.forEach(row => {
+      const kode = getField(row, ['kodeBB','kode_bb','Kode BB (Isi)','kodeBb','kode BB']);
+      const revisi = Number(getField(row, ['revisi','Revisi']) || 0);
+      if (!latest[kode] || revisi > Number(getField(latest[kode], ['revisi','Revisi']) || 0))
+        latest[kode] = row;
+    });
+    const sorted = Object.values(latest).sort((a,b) => {
+      const na = getField(a,['namaBB','nama_bb','Nama Bahan Baku','namaBahanbaku']) || '';
+      const nb = getField(b,['namaBB','nama_bb','Nama Bahan Baku','namaBahanbaku']) || '';
+      return na.localeCompare(nb);
+    });
+
+    sel.innerHTML = '<option value="">— Pilih Bahan Baku —</option>';
+    sorted.forEach(r => {
+      const kode = getField(r,['kodeBB','kode_bb','Kode BB (Isi)']);
+      const nama = getField(r,['namaBB','nama_bb','Nama Bahan Baku']);
+      const noDok = getField(r,['noDokTerbaru','no_dok_terbaru','Nomor Dokumen Terbaru (Acuan)','noDokumen']);
+      const o = document.createElement('option');
+      o.value = noDok;
+      o.textContent = `${kode} — ${nama}`;
+      sel.appendChild(o);
+    });
+  } catch(e) {
+    sel.innerHTML = '<option value="">— Gagal memuat —</option>';
+    alert('Gagal memuat data: ' + e.message);
+  }
+}
+
+/**
+ * Cari field dari beberapa kemungkinan nama
+ */
+function getField(obj, keys) {
+  for (const k of keys) {
+    if (obj[k] !== undefined && obj[k] !== null && obj[k] !== '') return obj[k];
+  }
+  // fallback: case-insensitive search
+  const lkeys = keys.map(k => k.toLowerCase().replace(/[\s_\-()]/g,''));
+  for (const [key, val] of Object.entries(obj)) {
+    if (val === undefined || val === null || val === '') continue;
+    const norm = key.toLowerCase().replace(/[\s_\-()]/g,'');
+    if (lkeys.some(lk => norm === lk || norm.includes(lk) || lk.includes(norm))) return val;
+  }
+  return '';
+}
+
+function safe(v) {
+  if (v === undefined || v === null || v === '' || v === '-') return '-';
+  return String(v).trim() || '-';
+}
+
+/**
+ * Format tanggal dari berbagai format:
+ * - Serial Excel (angka seperti 46065)
+ * - ISO string (2026-06-07T17:00:00.000Z)
+ * - String tanggal biasa
+ */
+function formatDate(val) {
+  if (!val || val === '-' || val === '') return '-';
+
+  const s = String(val).trim();
+
+  // ISO string: 2026-06-07T17:00:00.000Z atau 2026-06-07
+  if (/^\d{4}-\d{2}-\d{2}/.test(s)) {
+    // Ambil hanya bagian tanggal, hindari timezone issue
+    const parts = s.substring(0, 10).split('-');
+    const d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+    return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
+  }
+
+  // Serial Excel (angka)
+  const num = parseFloat(s);
+  if (!isNaN(num) && num > 40000 && num < 60000) {
+    // Excel serial date: hari sejak 1 Jan 1900 (dengan bug tahun kabisat 1900)
+    const d = new Date(Math.round((num - 25569) * 86400 * 1000));
+    // Koreksi timezone
+    const utc = new Date(d.getTime() + d.getTimezoneOffset() * 60000);
+    return utc.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
+  }
+
+  // Sudah string tanggal biasa
+  return s;
+}
+
+const CSE_LOGO_B64 = 'data:image/png;base64,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';
+
+function buildKopHTML(d, kodeBB, namaBB, noDokTerbaru, tanggal, noDokSebelumnya, pageNum, totalPages) {
+  return `
+  <table class="kop">
+    <tr>
+      <td class="kop-logo" rowspan="2">
+        <img src="${CSE_LOGO_B64}" alt="CSE Logo" class="cse-logo-img">
+      </td>
+      <td class="kop-title">
+        <div class="t1">SPESIFIKASI BAHAN BAKU</div>
+      </td>
+      <td class="kop-meta-top">
+        <div class="pg">Halaman ${pageNum} dari ${totalPages}</div>
+      </td>
+    </tr>
+    <tr>
+      <td class="kop-title">
+        <div class="t2">${namaBB.toUpperCase()}/${kodeBB}</div>
+      </td>
+      <td class="kop-meta-bottom">
+        <table>
+          <tr><td class="ml">No. Dokumen</td><td>: <strong>${noDokTerbaru}</strong></td></tr>
+          <tr><td class="ml">Tanggal Berlaku</td><td>: <strong>${tanggal}</strong></td></tr>
+          <tr><td class="ml">Menggantikan</td><td>: <strong>${noDokSebelumnya}</strong></td></tr>
+          <tr><td class="ml">Tanggal</td><td>: <strong>${tanggal}</strong></td></tr>
+        </table>
+      </td>
+    </tr>
+  </table>`;
+}
+
+function buildTtdHTML() {
+  return `
+  <div class="bagian-hdr">BAGIAN RESEARCH AND DEVELOPMENT</div>
+  <table class="ttd-tbl">
+    <tr>
+      <td class="role-cell">Disusun oleh<br>MOA dan Stabilita</td>
+      <td class="role-cell">Diperiksa oleh<br>PIC MOA dan Stabilita</td>
+      <td class="role-cell" style="border-right:1px solid #000">Disetujui oleh<br>Apoteker Penanggung Jawab</td>
+    </tr>
+    <tr>
+      <td class="sign-cell">&nbsp;</td>
+      <td class="sign-cell">&nbsp;</td>
+      <td class="sign-cell" style="border-right:1px solid #000">&nbsp;</td>
+    </tr>
+    <tr>
+      <td class="name-cell">Fransiska Mutiara</td>
+      <td class="name-cell">Andreana Anggi</td>
+      <td class="name-cell" style="border-right:1px solid #000">Vicania Raisa Rahman</td>
+    </tr>
+  </table>`;
+}
+
+function renderDoc() {
+  const noDok = document.getElementById('bbSelect').value;
+  const dlBtn = document.getElementById('dlBtn');
+  const dlBtnWord = document.getElementById('dlBtnWord');
+  if (!noDok) {
+    document.getElementById('docArea').innerHTML = `
+      <div class="empty-state">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+        </svg>
+        <p>Pilih bahan baku dari dropdown untuk menampilkan dokumen spesifikasi.</p>
+      </div>`;
+    dlBtn.disabled = true;
+    dlBtnWord.disabled = true;
+    currentDoc = null;
+    return;
+  }
+
+  // Cari semua baris dengan noDok ini (berbagai kemungkinan nama field)
+  const docRows = allData.filter(r => {
+    const nd = getField(r, ['noDokTerbaru','no_dok_terbaru','Nomor Dokumen Terbaru (Acuan)','noDokumen']);
+    return nd === noDok;
+  });
+  if (!docRows.length) return;
+  const d = docRows.sort((a,b) => Number(getField(b,['revisi','Revisi'])||0) - Number(getField(a,['revisi','Revisi'])||0))[0];
+  currentDoc = d;
+
+  // Debug: tampilkan semua field
+  console.log('Selected row fields:', d);
+
+  // Helper untuk ambil field dari row ini
+  const f = (keys) => safe(getField(d, keys));
+
+  // Field names — support berbagai variasi nama dari Apps Script
+  const kodeBB    = f(['kodeBB','kode_bb','Kode BB (Isi)','kodeBb']);
+  const namaBB    = f(['namaBB','nama_bb','Nama Bahan Baku','namaBahanbaku']);
+  const noDokTerbaru = f(['noDokTerbaru','no_dok_terbaru','Nomor Dokumen Terbaru (Acuan)','noDokumen','nomorDokumenTerbaru']);
+  const noDokSebelumnya = f(['noDokSebelumnya','no_dok_sebelumnya','No. Dokumen Sebelumnya','nomorDokumenSebelumnya']);
+  const tanggal   = formatDate(getField(d, ['tanggal','Tanggal (Isi)','tanggalIsi','tanggalBerlaku']));
+  const revisi    = getField(d, ['revisi','Revisi']) || '0';
+
+  const inci      = f(['inci','INCI']);
+  const produsen  = f(['produsen','PRODUSEN','produsen']);
+  const namaPemasok = f(['namaPemasok','nama_pemasok','NAMA PEMASOK','namaSupplier','supplier']);
+  const negaraProdusen = f(['negaraProdusen','negara_produsen','NEGARA PRODUSEN','negara']);
+
+  // Spesifikasi — handle berbagai nama field
+  const bentuk    = f(['bentuk','bentukSediaan','BENTUK SEDIAAN','bentuk_sediaan']);
+  const warna     = f(['warna','WARNA']);
+  const bau       = f(['bau','BAU']);
+  const ph        = f(['ph','PH','pH']);
+  const viskositas = f(['viskositas','VISKOSITAS']);
+  const beratJenis = f(['beratJenis','berat_jenis','BERAT JENIS','beratjenis']);
+  const indeksBias = f(['indeksBias','indeks_bias','INDEKS BIAS','indexRefraksi','indeksBias','indexBias']);
+  const kelarutan = f(['kelarutan','KELARUTAN']);
+  const kondisiPenyimpanan = f(['kondisiPenyimpanan','kondisi_penyimpanan','KONDISI PENYIMPANAN','kondisiPenyimpanan']);
+
+  // Riwayat: ambil semua baris dengan kode BB yang sama
+  const kode = getField(d, ['kodeBB','kode_bb','Kode BB (Isi)']);
+  const history = allData
+    .filter(r => getField(r, ['kodeBB','kode_bb','Kode BB (Isi)']) === kode)
+    .sort((a,b) => Number(getField(a,['revisi','Revisi'])||0) - Number(getField(b,['revisi','Revisi'])||0));
+
+  // Hanya render baris yang ada isinya
+  let histRows = '';
+  history.forEach(h => {
+    const rev = getField(h, ['revisi','Revisi']);
+    const nd  = getField(h, ['noDokTerbaru','no_dok_terbaru','Nomor Dokumen Terbaru (Acuan)']);
+    const tgl = formatDate(getField(h, ['tanggal','Tanggal (Isi)']));
+    const alasan = getField(h, ['alasanPerubahan','alasan_perubahan','Alasan Perubahan (Isi)','alasan']) || '';
+
+    if (!nd && !alasan) return; // skip baris benar-benar kosong
+
+    const revStr = rev !== '' && rev !== null && rev !== undefined
+      ? String(Number(rev)).padStart(2,'0')
+      : '';
+
+    histRows += `<tr>
+      <td>${revStr}</td>
+      <td>${nd || ''}</td>
+      <td>${tgl !== '-' ? tgl : ''}</td>
+      <td class="left">${alasan}</td>
+    </tr>`;
+  });
+
+  const revNum = Number(revisi) || 0;
+
+  document.getElementById('docArea').innerHTML = `
+<div id="docContent">
+
+  <!-- KOP -->
+  ${buildKopHTML(d, kodeBB, namaBB, noDokTerbaru, tanggal, noDokSebelumnya, 1, 1)}
+
+  ${buildTtdHTML()}
+
+  <!-- 1. IDENTITAS -->
+  <div class="sec">
+    <div class="sec-title">1. IDENTITAS BAHAN BAKU</div>
+    <table class="tbl">
+      <tr><td class="lbl">Nama Bahan Baku/Kode Bahan</td><td>${namaBB}</td></tr>
+      <tr><td class="lbl">INCI</td><td>${inci}</td></tr>
+      <tr><td class="lbl">Produsen</td><td>${produsen}</td></tr>
+      <tr><td class="lbl">Nama Pemasok/Supplier</td><td>${namaPemasok}</td></tr>
+      <tr><td class="lbl">Negara Produsen</td><td>${negaraProdusen}</td></tr>
+    </table>
+  </div>
+
+  <!-- 2. PARAMETER UJI -->
+  <div class="sec">
+    <div class="sec-title">2. PARAMETER UJI</div>
+    <table class="tbl">
+      <thead>
+        <tr>
+          <th style="width:30%">ANALISA</th>
+          <th style="width:40%">SPESIFIKASI</th>
+          <th>METODE</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <div class="multiline">
+              <span><strong>Pemerian</strong></span>
+              <span>a. Bentuk</span>
+              <span>b. Warna</span>
+              <span>c. Bau</span>
+            </div>
+          </td>
+          <td>
+            <div class="multiline">
+              <span>&nbsp;</span>
+              <span>${bentuk}</span>
+              <span>${warna}</span>
+              <span>${bau}</span>
+            </div>
+          </td>
+          <td>
+            <div class="multiline">
+              <span>&nbsp;</span>
+              <span>Visual &amp; Organoleptik</span>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div class="multiline">
+              <span><strong>Tetapan Fisik</strong></span>
+              <span>pH</span>
+              <span>Viskositas</span>
+              <span>Berat Jenis</span>
+              <span>Index Refraksi</span>
+              <span>Kelarutan</span>
+            </div>
+          </td>
+          <td>
+            <div class="multiline">
+              <span>&nbsp;</span>
+              <span>${ph}</span>
+              <span>${viskositas}</span>
+              <span>${beratJenis}</span>
+              <span>${indeksBias}</span>
+              <span>${kelarutan}</span>
+            </div>
+          </td>
+          <td>
+            <div class="multiline">
+              <span>&nbsp;</span>
+              <span>pH Meter</span>
+              <span>Viskometer</span>
+              <span>Piknometer</span>
+              <span>Refraktometer</span>
+              <span>Uji Kualitatif</span>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td><strong>Kondisi penyimpanan</strong></td>
+          <td>${kondisiPenyimpanan}</td>
+          <td>Visual</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 3. RIWAYAT -->
+  <div class="sec">
+    <div class="sec-title">3. RIWAYAT PERUBAHAN</div>
+    <table class="rtbl">
+      <thead>
+        <tr>
+          <th style="width:12%">No. Revisi</th>
+          <th style="width:28%">Nomor Dokumen</th>
+          <th style="width:22%">Tanggal Berlaku</th>
+          <th>Alasan Perubahan</th>
+        </tr>
+      </thead>
+      <tbody>${histRows}</tbody>
+    </table>
+  </div>
+
+</div>`;
+
+  dlBtn.disabled = false;
+  dlBtnWord.disabled = false;
+}
+
+async function downloadPDF() {
+  if (!currentDoc) return;
+
+  const overlay = document.getElementById('spinnerOverlay');
+  const msg = document.getElementById('spinnerMsg');
+  overlay.classList.add('show');
+  msg.textContent = 'Menyiapkan halaman…';
+
+  // Container tersembunyi untuk membangun & mengukur halaman A4 satu per satu
+  const stage = document.createElement('div');
+  stage.style.position = 'fixed';
+  stage.style.left = '-99999px';
+  stage.style.top = '0';
+  stage.style.zIndex = '-1';
+  document.body.appendChild(stage);
+
+  try {
+    const d = currentDoc;
+    const f = (keys) => safe(getField(d, keys));
+    const kodeBB    = f(['kodeBB','kode_bb','Kode BB (Isi)','kodeBb']);
+    const namaBB    = f(['namaBB','nama_bb','Nama Bahan Baku','namaBahanbaku']);
+    const noDokTerbaru = f(['noDokTerbaru','no_dok_terbaru','Nomor Dokumen Terbaru (Acuan)','noDokumen','nomorDokumenTerbaru']);
+    const noDokSebelumnya = f(['noDokSebelumnya','no_dok_sebelumnya','No. Dokumen Sebelumnya','nomorDokumenSebelumnya']);
+    const tanggal   = formatDate(getField(d, ['tanggal','Tanggal (Isi)','tanggalIsi','tanggalBerlaku']));
+
+    // Ambil HTML body sections yang sudah dirender di layar (docContent saat ini)
+    const liveDoc = document.getElementById('docContent');
+    if (!liveDoc) throw new Error('Dokumen belum dirender');
+
+    // Body blocks = setiap .sec (section 1, 2, 3) dianggap 1 blok yang tidak boleh terpotong.
+    // Untuk section riwayat (3) yang berpotensi panjang, baris-baris <tr> bisa dipecah antar halaman.
+    const sections = Array.from(liveDoc.querySelectorAll(':scope > .sec'));
+    if (!sections.length) throw new Error('Konten dokumen kosong');
+
+    // Pisahkan: section riwayat (terakhir) dipecah per baris jika perlu; section lain jadi 1 blok utuh.
+    const riwayatSection = sections[sections.length - 1];
+    const otherSections = sections.slice(0, -1);
+
+    const riwayatTitle = riwayatSection.querySelector('.sec-title')?.outerHTML || '';
+    const riwayatTable = riwayatSection.querySelector('table.rtbl');
+    const riwayatTheadHTML = riwayatTable ? riwayatTable.querySelector('thead').outerHTML : '';
+    const riwayatRows = riwayatTable ? Array.from(riwayatTable.querySelectorAll('tbody > tr')) : [];
+
+    // ── Bangun halaman-halaman ──
+    // Page wrapper: ukuran A4 794x1123px @ 96dpi approx (kita pakai lebar 794 spt docContent asli, tinggi A4 ratio)
+    const PAGE_W = 794;
+    const PAGE_PAD = 40; // padding kiri-kanan-atas-bawah seperti #docContent asli
+    const MAX_BODY_H = 925; // batas tinggi area body per halaman (px), disesuaikan agar muat A4 dgn margin cetak (dikurangi krn sign-cell lebih tinggi)
+
+    function makePageShell() {
+      const page = document.createElement('div');
+      page.className = 'pdf-page';
+      page.style.width = PAGE_W + 'px';
+      page.style.padding = PAGE_PAD + 'px 50px';
+      page.style.fontFamily = "'Times New Roman', Times, serif";
+      page.style.fontSize = '11pt';
+      page.style.color = '#000';
+      page.style.background = '#fff';
+      page.style.boxSizing = 'border-box';
+      const kopWrap = document.createElement('div');
+      kopWrap.innerHTML = buildKopHTML(d, kodeBB, namaBB, noDokTerbaru, tanggal, noDokSebelumnya, 1, 1);
+      const ttdWrap = document.createElement('div');
+      ttdWrap.innerHTML = buildTtdHTML();
+      const bodyWrap = document.createElement('div');
+      bodyWrap.className = 'pdf-page-body';
+      bodyWrap.style.marginTop = '0';
+      page.appendChild(kopWrap.firstElementChild);
+      page.appendChild(ttdWrap.firstElementChild);
+      page.appendChild(ttdWrap.lastElementChild);
+      page.appendChild(bodyWrap);
+      return { page, bodyWrap };
+    }
+
+    const pages = [];
+    let current = makePageShell();
+    stage.appendChild(current.page);
+
+    function currentBodyHeight() {
+      return current.bodyWrap.scrollHeight;
+    }
+
+    function newPage() {
+      pages.push(current.page);
+      current = makePageShell();
+      stage.appendChild(current.page);
+    }
+
+    // Tambahkan section non-riwayat sebagai blok utuh
+    otherSections.forEach(sec => {
+      const clone = sec.cloneNode(true);
+      current.bodyWrap.appendChild(clone);
+      if (currentBodyHeight() > MAX_BODY_H) {
+        current.bodyWrap.removeChild(clone);
+        newPage();
+        current.bodyWrap.appendChild(clone);
+      }
+    });
+
+    // Tambahkan section riwayat: judul + tabel, baris ditambah satu-satu agar tidak terpotong di tengah baris
+    if (riwayatTable) {
+      const secDiv = document.createElement('div');
+      secDiv.className = 'sec';
+      secDiv.innerHTML = riwayatTitle + `<table class="rtbl">${riwayatTheadHTML}<tbody></tbody></table>`;
+      current.bodyWrap.appendChild(secDiv);
+      if (currentBodyHeight() > MAX_BODY_H) {
+        current.bodyWrap.removeChild(secDiv);
+        newPage();
+        current.bodyWrap.appendChild(secDiv);
+      }
+      let tbody = secDiv.querySelector('tbody');
+
+      riwayatRows.forEach(rowEl => {
+        const rowClone = rowEl.cloneNode(true);
+        tbody.appendChild(rowClone);
+        if (currentBodyHeight() > MAX_BODY_H) {
+          tbody.removeChild(rowClone);
+          newPage();
+          const secDiv2 = document.createElement('div');
+          secDiv2.className = 'sec';
+          secDiv2.innerHTML = `<table class="rtbl">${riwayatTheadHTML}<tbody></tbody></table>`;
+          current.bodyWrap.appendChild(secDiv2);
+          tbody = secDiv2.querySelector('tbody');
+          tbody.appendChild(rowClone);
+        }
+      });
+    }
+
+    pages.push(current.page);
+
+    // Update nomor halaman pada tiap kop yang sudah dibangun
+    const totalPages = pages.length;
+    pages.forEach((pageEl, idx) => {
+      const pgEl = pageEl.querySelector('.kop-meta-top .pg');
+      if (pgEl) pgEl.textContent = `Halaman ${idx + 1} dari ${totalPages}`;
+    });
+
+    // ── Screenshot tiap halaman & susun ke PDF ──
+    msg.textContent = 'Merender halaman 1 dari ' + totalPages + '…';
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const pageWmm = 210;
+    const pageHmm = 297;
+    const marginMm = 8;
+    const imgWmm = pageWmm - marginMm * 2;
+
+    for (let i = 0; i < pages.length; i++) {
+      msg.textContent = `Merender halaman ${i + 1} dari ${totalPages}…`;
+      const canvas = await html2canvas(pages[i], {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#ffffff',
+        logging: false
+      });
+      const imgData = canvas.toDataURL('image/jpeg', 0.97);
+      const ratio = canvas.width / canvas.height;
+      let imgHmm = imgWmm / ratio;
+      if (imgHmm > pageHmm - marginMm * 2) imgHmm = pageHmm - marginMm * 2;
+      if (i > 0) pdf.addPage();
+      pdf.addImage(imgData, 'JPEG', marginMm, marginMm, imgWmm, imgHmm);
+    }
+
+    msg.textContent = 'Menyimpan PDF…';
+    const kode = getField(currentDoc, ['kodeBB','kode_bb','Kode BB (Isi)']);
+    const nama = getField(currentDoc, ['namaBB','nama_bb','Nama Bahan Baku']);
+    const filename = `SBB_${kode}_${(nama||'').replace(/[^a-zA-Z0-9]/g,'_')}.pdf`;
+    pdf.save(filename);
+  } catch(e) {
+    alert('Gagal membuat PDF: ' + e.message);
+    console.error(e);
+  } finally {
+    document.body.removeChild(stage);
+    overlay.classList.remove('show');
+  }
+}
+
+// ───────────────────────── DOWNLOAD WORD (.docx) ─────────────────────────
+// ───────────────────────── LOADER LIBRARY DOCX (dengan fallback CDN) ─────────────────────────
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = src;
+    s.onload = () => resolve();
+    s.onerror = () => reject(new Error('Gagal memuat: ' + src));
+    document.head.appendChild(s);
+  });
+}
+
+let _docxLoadingPromise = null;
+function ensureDocxLoaded(onStatus) {
+  if (typeof docx !== 'undefined') return Promise.resolve();
+  if (_docxLoadingPromise) return _docxLoadingPromise;
+
+  const sources = [
+    'https://cdn.jsdelivr.net/npm/docx@9.6.1/build/index.umd.cjs',
+    'https://unpkg.com/docx@9.6.1/build/index.umd.cjs',
+    'https://cdnjs.cloudflare.com/ajax/libs/docx/9.6.1/index.umd.min.js',
+  ];
+
+  _docxLoadingPromise = (async () => {
+    for (let i = 0; i < sources.length; i++) {
+      if (typeof docx !== 'undefined') return;
+      try {
+        if (onStatus) onStatus(`Memuat komponen Word… (${i + 1}/${sources.length})`);
+        await loadScript(sources[i]);
+        // beri sedikit waktu agar script selesai dieksekusi & mendaftar global
+        await new Promise(r => setTimeout(r, 150));
+        if (typeof docx !== 'undefined') return;
+      } catch (e) {
+        // lanjut coba sumber berikutnya
+      }
+    }
+    if (typeof docx === 'undefined') {
+      throw new Error('Tidak bisa memuat komponen Word dari semua sumber. Cek koneksi internet (atau firewall/jaringan kantor mungkin memblokir CDN) lalu coba lagi.');
+    }
+  })();
+
+  return _docxLoadingPromise;
+}
+
+async function downloadWord() {
+  if (!currentDoc) return;
+  const overlay = document.getElementById('spinnerOverlay');
+  const msg = document.getElementById('spinnerMsg');
+  overlay.classList.add('show');
+  msg.textContent = 'Menyiapkan komponen Word…';
+
+  try {
+    await ensureDocxLoaded((status) => { msg.textContent = status; });
+    msg.textContent = 'Membuat dokumen Word…';
+    const {
+      Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
+      Header, AlignmentType, BorderStyle, WidthType, VerticalAlign, ImageRun, PageNumber
+    } = docx;
+
+    const d = currentDoc;
+    const f = (keys) => safe(getField(d, keys));
+    const kodeBB = f(['kodeBB','kode_bb','Kode BB (Isi)','kodeBb']);
+    const namaBB = f(['namaBB','nama_bb','Nama Bahan Baku','namaBahanbaku']);
+    const noDokTerbaru = f(['noDokTerbaru','no_dok_terbaru','Nomor Dokumen Terbaru (Acuan)','noDokumen','nomorDokumenTerbaru']);
+    const noDokSebelumnya = f(['noDokSebelumnya','no_dok_sebelumnya','No. Dokumen Sebelumnya','nomorDokumenSebelumnya']);
+    const tanggal = formatDate(getField(d, ['tanggal','Tanggal (Isi)','tanggalIsi','tanggalBerlaku']));
+    const inci = f(['inci','INCI']);
+    const produsen = f(['produsen','PRODUSEN']);
+    const namaPemasok = f(['namaPemasok','nama_pemasok','NAMA PEMASOK','namaSupplier','supplier']);
+    const negaraProdusen = f(['negaraProdusen','negara_produsen','NEGARA PRODUSEN','negara']);
+    const bentuk = f(['bentuk','bentukSediaan','BENTUK SEDIAAN','bentuk_sediaan']);
+    const warna = f(['warna','WARNA']);
+    const bau = f(['bau','BAU']);
+    const ph = f(['ph','PH','pH']);
+    const viskositas = f(['viskositas','VISKOSITAS']);
+    const beratJenis = f(['beratJenis','berat_jenis','BERAT JENIS','beratjenis']);
+    const indeksBias = f(['indeksBias','indeks_bias','INDEKS BIAS','indexRefraksi','indexBias']);
+    const kelarutan = f(['kelarutan','KELARUTAN']);
+    const kondisiPenyimpanan = f(['kondisiPenyimpanan','kondisi_penyimpanan','KONDISI PENYIMPANAN']);
+
+    const kode = getField(d, ['kodeBB','kode_bb','Kode BB (Isi)']);
+    const history = allData
+      .filter(r => getField(r, ['kodeBB','kode_bb','Kode BB (Isi)']) === kode)
+      .sort((a,b) => Number(getField(a,['revisi','Revisi'])||0) - Number(getField(b,['revisi','Revisi'])||0));
+
+    const riwayat = [];
+    history.forEach(h => {
+      const rev = getField(h, ['revisi','Revisi']);
+      const nd = getField(h, ['noDokTerbaru','no_dok_terbaru','Nomor Dokumen Terbaru (Acuan)']);
+      const tgl = formatDate(getField(h, ['tanggal','Tanggal (Isi)']));
+      const alasan = getField(h, ['alasanPerubahan','alasan_perubahan','Alasan Perubahan (Isi)','alasan']) || '';
+      if (!nd && !alasan) return;
+      const revStr = rev !== '' && rev !== null && rev !== undefined ? String(Number(rev)).padStart(2,'0') : '';
+      riwayat.push({ revisi: revStr, noDok: nd || '', tanggal: tgl !== '-' ? tgl : '', alasan });
+    });
+
+    // ── Konstanta styling ──
+    const FONT = 'Times New Roman';
+    const SZ11 = 22, SZ14 = 28;
+    const black = '000000';
+    const thinBorder = { style: BorderStyle.SINGLE, size: 4, color: black };
+    const noBorder = { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' };
+    function cellBorders(opts = {}) {
+      return {
+        top: opts.top === false ? noBorder : thinBorder,
+        bottom: opts.bottom === false ? noBorder : thinBorder,
+        left: opts.left === false ? noBorder : thinBorder,
+        right: opts.right === false ? noBorder : thinBorder,
+      };
+    }
+    function p(text, opts = {}) {
+      return new Paragraph({
+        alignment: opts.align || AlignmentType.LEFT,
+        spacing: { after: 0, before: 0 },
+        children: [new TextRun({ text, bold: !!opts.bold, size: opts.size || SZ11, font: FONT, color: black })],
+      });
+    }
+
+    // base64 → Uint8Array untuk ImageRun
+    function base64ToBytes(base64) {
+      const binStr = atob(base64.split(',')[1]);
+      const bytes = new Uint8Array(binStr.length);
+      for (let i = 0; i < binStr.length; i++) bytes[i] = binStr.charCodeAt(i);
+      return bytes;
+    }
+    const logoBytes = base64ToBytes(CSE_LOGO_B64);
+
+    function metaTable() {
+      const rows = [
+        ['No. Dokumen', noDokTerbaru],
+        ['Tanggal Berlaku', tanggal],
+        ['Menggantikan', noDokSebelumnya],
+        ['Tanggal', tanggal],
+      ];
+      return new Table({
+        width: { size: 3940, type: WidthType.DXA },
+        columnWidths: [1650, 2290],
+        rows: rows.map(([label, val]) => new TableRow({
+          children: [
+            new TableCell({
+              borders: cellBorders({ top: false, bottom: false, left: false, right: false }),
+              width: { size: 1650, type: WidthType.DXA },
+              margins: { top: 10, bottom: 10, left: 0, right: 0 },
+              children: [new Paragraph({ spacing: { after: 0 }, children: [new TextRun({ text: label, bold: true, size: SZ11, font: FONT, color: black })] })],
+            }),
+            new TableCell({
+              borders: cellBorders({ top: false, bottom: false, left: false, right: false }),
+              width: { size: 2290, type: WidthType.DXA },
+              margins: { top: 10, bottom: 10, left: 0, right: 0 },
+              children: [new Paragraph({ spacing: { after: 0 }, children: [
+                new TextRun({ text: ': ', bold: true, size: SZ11, font: FONT, color: black }),
+                new TextRun({ text: val, bold: true, size: SZ11, font: FONT, color: black }),
+              ] })],
+            }),
+          ],
+        })),
+      });
+    }
+
+    function buildKop() {
+      const kopTable = new Table({
+        width: { size: 9906, type: WidthType.DXA },
+        columnWidths: [2200, 3606, 4100],
+        rows: [
+          new TableRow({
+            children: [
+              new TableCell({
+                borders: cellBorders({ bottom: false }),
+                width: { size: 2200, type: WidthType.DXA },
+                verticalAlign: VerticalAlign.TOP,
+                rowSpan: 2,
+                margins: { top: 100, bottom: 80, left: 80, right: 50 },
+                children: [new Paragraph({ children: [new ImageRun({ data: logoBytes, transformation: { width: 150, height: 40 }, type: 'png' })] })],
+              }),
+              new TableCell({
+                borders: cellBorders(),
+                width: { size: 3606, type: WidthType.DXA },
+                verticalAlign: VerticalAlign.CENTER,
+                margins: { top: 60, bottom: 40, left: 100, right: 100 },
+                children: [p('SPESIFIKASI BAHAN BAKU', { bold: true, size: SZ14, align: AlignmentType.CENTER })],
+              }),
+              new TableCell({
+                borders: cellBorders({ left: false }),
+                width: { size: 4100, type: WidthType.DXA },
+                verticalAlign: VerticalAlign.CENTER,
+                margins: { top: 60, bottom: 60, left: 100, right: 100 },
+                children: [
+                  new Paragraph({
+                    alignment: AlignmentType.CENTER,
+                    spacing: { after: 0, before: 0 },
+                    children: [
+                      new TextRun({ text: 'Halaman ', bold: true, size: SZ11, font: FONT, color: black }),
+                      new TextRun({ children: [PageNumber.CURRENT], bold: true, size: SZ11, font: FONT, color: black }),
+                      new TextRun({ text: ' dari ', bold: true, size: SZ11, font: FONT, color: black }),
+                      new TextRun({ children: [PageNumber.TOTAL_PAGES], bold: true, size: SZ11, font: FONT, color: black }),
+                    ],
+                  }),
+                ],
+              }),
+            ],
+          }),
+          new TableRow({
+            children: [
+              new TableCell({
+                borders: cellBorders({ top: false }),
+                width: { size: 3606, type: WidthType.DXA },
+                verticalAlign: VerticalAlign.CENTER,
+                margins: { top: 40, bottom: 60, left: 100, right: 100 },
+                children: [p(`${namaBB.toUpperCase()}/${kodeBB}`, { bold: true, size: SZ14, align: AlignmentType.CENTER })],
+              }),
+              new TableCell({
+                borders: cellBorders({ left: false, top: false }),
+                width: { size: 4100, type: WidthType.DXA },
+                verticalAlign: VerticalAlign.TOP,
+                margins: { top: 60, bottom: 60, left: 100, right: 60 },
+                children: [metaTable()],
+              }),
+            ],
+          }),
+        ],
+      });
+
+      const bagianHdr = new Table({
+        width: { size: 9906, type: WidthType.DXA },
+        columnWidths: [9906],
+        rows: [new TableRow({ children: [new TableCell({
+          borders: cellBorders(),
+          width: { size: 9906, type: WidthType.DXA },
+          margins: { top: 60, bottom: 60, left: 100, right: 100 },
+          children: [p('BAGIAN RESEARCH AND DEVELOPMENT', { bold: true, align: AlignmentType.CENTER })],
+        }) ] })],
+      });
+
+      const roles = ['Disusun oleh\nMOA dan Stabilita', 'Diperiksa oleh\nPIC MOA dan Stabilita', 'Disetujui oleh\nApoteker Penanggung Jawab'];
+      const names = ['Fransiska Mutiara', 'Andreana Anggi', 'Vicania Raisa Rahman'];
+      const colW = 3302;
+
+      function roleCell(role, isLast) {
+        const lines = role.split('\n');
+        return new TableCell({
+          borders: cellBorders({ top: false, right: isLast ? true : false }),
+          width: { size: colW, type: WidthType.DXA },
+          margins: { top: 60, bottom: 60, left: 100, right: 100 },
+          children: [
+            new Paragraph({
+              alignment: AlignmentType.CENTER,
+              spacing: { before: 0, after: 0 },
+              children: lines.map((l, i) => new TextRun({ text: l, bold: true, size: SZ11, font: FONT, color: black, break: i > 0 ? 1 : 0 })),
+            }),
+          ],
+        });
+      }
+
+      function signCell(isLast) {
+        return new TableCell({
+          borders: cellBorders({ top: false, right: isLast ? true : false }),
+          width: { size: colW, type: WidthType.DXA },
+          margins: { top: 0, bottom: 0, left: 100, right: 100 },
+          children: [
+            new Paragraph({ spacing: { before: 0, after: 0 }, children: [new TextRun({ text: ' ', size: SZ11, font: FONT })] }),
+            new Paragraph({ spacing: { before: 0, after: 0 }, children: [new TextRun({ text: ' ', size: SZ11, font: FONT })] }),
+            new Paragraph({ spacing: { before: 0, after: 0 }, children: [new TextRun({ text: ' ', size: SZ11, font: FONT })] }),
+            new Paragraph({ spacing: { before: 0, after: 0 }, children: [new TextRun({ text: ' ', size: SZ11, font: FONT })] }),
+            new Paragraph({ spacing: { before: 0, after: 0 }, children: [new TextRun({ text: ' ', size: SZ11, font: FONT })] }),
+            new Paragraph({ spacing: { before: 0, after: 0 }, children: [new TextRun({ text: ' ', size: SZ11, font: FONT })] }),
+          ],
+        });
+      }
+
+      function nameCell(name, isLast) {
+        return new TableCell({
+          borders: cellBorders({ top: true, right: isLast ? true : false }),
+          width: { size: colW, type: WidthType.DXA },
+          margins: { top: 60, bottom: 60, left: 100, right: 100 },
+          children: [
+            new Paragraph({
+              alignment: AlignmentType.CENTER,
+              spacing: { before: 0, after: 0 },
+              children: [new TextRun({ text: name, bold: true, size: SZ11, font: FONT, color: black })],
+            }),
+          ],
+        });
+      }
+
+      const ttdTable = new Table({
+        width: { size: 9906, type: WidthType.DXA },
+        columnWidths: [colW, colW, colW],
+        rows: [
+          new TableRow({ children: [
+            roleCell(roles[0], false),
+            roleCell(roles[1], false),
+            roleCell(roles[2], true),
+          ] }),
+          new TableRow({ children: [
+            signCell(false),
+            signCell(false),
+            signCell(true),
+          ] }),
+          new TableRow({ children: [
+            nameCell(names[0], false),
+            nameCell(names[1], false),
+            nameCell(names[2], true),
+          ] }),
+        ],
+      });
+
+      return [kopTable, bagianHdr, ttdTable, new Paragraph({ spacing: { after: 120 }, children: [] })];
+    }
+
+    function sectionTitle(text) {
+      return new Paragraph({
+        spacing: { before: 120, after: 80 },
+        children: [new TextRun({ text, bold: true, size: SZ11, font: FONT, color: black })],
+      });
+    }
+
+    function tblCell(text, opts = {}) {
+      return new TableCell({
+        borders: cellBorders(),
+        width: { size: opts.width || 3000, type: WidthType.DXA },
+        verticalAlign: VerticalAlign.TOP,
+        margins: { top: 60, bottom: 60, left: 100, right: 100 },
+        children: (Array.isArray(text) ? text : [text]).map(t =>
+          typeof t === 'string'
+            ? new Paragraph({ alignment: opts.align || AlignmentType.LEFT, spacing: { after: 0 }, children: [new TextRun({ text: t, bold: !!opts.bold, size: SZ11, font: FONT, color: black })] })
+            : t
+        ),
+      });
+    }
+
+    function buildIdentitas() {
+      const rows = [
+        ['Nama Bahan Baku/Kode Bahan', namaBB],
+        ['INCI', inci],
+        ['Produsen', produsen],
+        ['Nama Pemasok/Supplier', namaPemasok],
+        ['Negara Produsen', negaraProdusen],
+      ];
+      return new Table({
+        width: { size: 9906, type: WidthType.DXA },
+        columnWidths: [3300, 6606],
+        rows: rows.map(([label, val]) => new TableRow({ children: [tblCell(label, { width: 3300 }), tblCell(val, { width: 6606 })] })),
+      });
+    }
+
+    function multilineCell(lines, opts = {}) {
+      return new TableCell({
+        borders: cellBorders(),
+        width: { size: opts.width || 3000, type: WidthType.DXA },
+        verticalAlign: VerticalAlign.TOP,
+        margins: { top: 60, bottom: 60, left: 100, right: 100 },
+        children: lines.map(l => new Paragraph({ spacing: { after: 40 }, children: [new TextRun({ text: l.text, bold: !!l.bold, size: SZ11, font: FONT, color: black })] })),
+      });
+    }
+
+    function buildParameterUji() {
+      const headerRow = new TableRow({
+        tableHeader: true,
+        children: [
+          tblCell([new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: 'ANALISA', bold: true, size: SZ11, font: FONT, color: black })] })], { width: 2967 }),
+          tblCell([new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: 'SPESIFIKASI', bold: true, size: SZ11, font: FONT, color: black })] })], { width: 3761 }),
+          tblCell([new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: 'METODE', bold: true, size: SZ11, font: FONT, color: black })] })], { width: 3178 }),
+        ],
+      });
+      const row1 = new TableRow({ children: [
+        multilineCell([{ text: 'Pemerian', bold: true }, { text: 'a. Bentuk' }, { text: 'b. Warna' }, { text: 'c. Bau' }], { width: 2967 }),
+        multilineCell([{ text: ' ' }, { text: bentuk }, { text: warna }, { text: bau }], { width: 3761 }),
+        multilineCell([{ text: ' ' }, { text: 'Visual & Organoleptik' }], { width: 3178 }),
+      ] });
+      const row2 = new TableRow({ children: [
+        multilineCell([{ text: 'Tetapan Fisik', bold: true }, { text: 'pH' }, { text: 'Viskositas' }, { text: 'Berat Jenis' }, { text: 'Index Refraksi' }, { text: 'Kelarutan' }], { width: 2967 }),
+        multilineCell([{ text: ' ' }, { text: ph }, { text: viskositas }, { text: beratJenis }, { text: indeksBias }, { text: kelarutan }], { width: 3761 }),
+        multilineCell([{ text: ' ' }, { text: 'pH Meter' }, { text: 'Viskometer' }, { text: 'Piknometer' }, { text: 'Refraktometer' }, { text: 'Uji Kualitatif' }], { width: 3178 }),
+      ] });
+      const row3 = new TableRow({ children: [
+        tblCell('Kondisi penyimpanan', { width: 2800, bold: true }),
+        tblCell(kondisiPenyimpanan, { width: 3761 }),
+        tblCell('Visual', { width: 3178 }),
+      ] });
+      return new Table({ width: { size: 9906, type: WidthType.DXA }, columnWidths: [2967, 3761, 3178], rows: [headerRow, row1, row2, row3] });
+    }
+
+    function buildRiwayat() {
+      const headerRow = new TableRow({
+        tableHeader: true,
+        children: [
+          tblCell([new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: 'No. Revisi', bold: true, size: SZ11, font: FONT, color: black })] })], { width: 1165 }),
+          tblCell([new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: 'Nomor Dokumen', bold: true, size: SZ11, font: FONT, color: black })] })], { width: 2755 }),
+          tblCell([new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: 'Tanggal Berlaku', bold: true, size: SZ11, font: FONT, color: black })] })], { width: 2119 }),
+          tblCell([new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: 'Alasan Perubahan', bold: true, size: SZ11, font: FONT, color: black })] })], { width: 3867 }),
+        ],
+      });
+      const dataRows = riwayat.map(r => new TableRow({
+        cantSplit: true,
+        children: [
+        tblCell([new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: r.revisi, size: SZ11, font: FONT, color: black })] })], { width: 1165 }),
+        tblCell([new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: r.noDok, size: SZ11, font: FONT, color: black })] })], { width: 2755 }),
+        tblCell([new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: r.tanggal, size: SZ11, font: FONT, color: black })] })], { width: 2119 }),
+        tblCell(r.alasan, { width: 3867 }),
+      ] }));
+      return new Table({ width: { size: 9906, type: WidthType.DXA }, columnWidths: [1165, 2755, 2119, 3867], rows: [headerRow, ...dataRows] });
+    }
+
+    msg.textContent = 'Menyusun struktur dokumen…';
+    const doc = new Document({
+      sections: [{
+        properties: {
+          page: {
+            size: { width: 11906, height: 16838 },
+            margin: { top: 720, right: 1000, bottom: 720, left: 1000 },
+          },
+        },
+        headers: { default: new Header({ children: buildKop() }) },
+        children: [
+          sectionTitle('1. IDENTITAS BAHAN BAKU'),
+          buildIdentitas(),
+          sectionTitle('2. PARAMETER UJI'),
+          buildParameterUji(),
+          sectionTitle('3. RIWAYAT PERUBAHAN'),
+          buildRiwayat(),
+        ],
+      }],
+    });
+
+    msg.textContent = 'Menyimpan file Word…';
+    const blob = await Packer.toBlob(doc);
+    const kodeFile = getField(currentDoc, ['kodeBB','kode_bb','Kode BB (Isi)']);
+    const namaFile = getField(currentDoc, ['namaBB','nama_bb','Nama Bahan Baku']);
+    const filename = `SBB_${kodeFile}_${(namaFile||'').replace(/[^a-zA-Z0-9]/g,'_')}.docx`;
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  } catch (e) {
+    alert('Gagal membuat Word: ' + e.message);
+    console.error(e);
+  } finally {
+    overlay.classList.remove('show');
+  }
+}
+</script>
+</body>
+</html>
